@@ -48,7 +48,7 @@ int negamax(state_t state, int depth, int color, bool use_tt = false){
     // Suma 1 a los nodos generados
     generated++;
     // Si el árbol alcanzó la profundidad máxima o es terminal, retorna el valor.
-    if (depth==INT_MAX || state.terminal()) {
+    if (depth==INT_MIN || state.terminal()) {
         return color * state.value();
     };
     // Inicializa alpha y la variable booleana para el jugador
@@ -63,19 +63,193 @@ int negamax(state_t state, int depth, int color, bool use_tt = false){
             // El estado es generado con la función move
             state_t state_movement = state.move(player,child_position);
             // Se calcula Alpha
-            alpha = max(alpha,-negamax(state_movement,depth+1,-color,use_tt=false));
+            alpha = max(alpha,-negamax(state_movement,depth-1,-color,use_tt=false));
         };
     }
     // si no hay, ubico el alpha 
     else {
-        alpha = max(alpha,-negamax(state,depth+1,-color,use_tt=false));        
+        alpha = max(alpha,-negamax(state,depth-1,-color,use_tt=false));        
     }
     return alpha;
 }
 
-int negamax(state_t state, int depth, int alpha, int beta, int color, bool use_tt = false);
-int scout(state_t state, int depth, int color, bool use_tt = false);
-int negascout(state_t state, int depth, int alpha, int beta, int color, bool use_tt = false);
+int negamax(state_t state, int depth, int alpha, int beta, int color, bool use_tt = false) {
+    generated++;
+    
+    // Si el árbol alcanzó la profundidad máxima o es terminal, retorna el valor.
+    if (depth==INT_MIN || state.terminal()) {
+        return color * state.value();
+    };
+    
+    // Inicializa alpha y la variable booleana para el jugador
+    int score = INT_MIN;
+    bool player = color == 1 ? true : false;
+    
+    // Arreglo de los estados hijos del estado actual para el jugador actual
+    vector<int> childs = state.possible_moves(player);
+    
+    // Mientras hayan hijos por revisar:
+    if (!childs.empty()) { 
+        for (int child_position : childs) {
+            expanded++;
+            
+            // El estado es generado con la función move
+            state_t state_movement = state.move(player,child_position);
+            
+            // Se calcula Alpha
+            int value = -negamax(state_movement,depth-1,-beta,-alpha,-color,use_tt=false);
+            score = max(score,value);
+            alpha = max(alpha,value);
+            if (alpha >= beta) {
+                break;
+            }
+        };
+    }
+    
+    // si no hay hijos, ubico el alpha 
+    else {
+        int value = -negamax(state,depth-1,-beta,-alpha,-color,use_tt=false);
+        score = max(score,value);
+    }
+    return score;
+}
+
+bool test(state_t state, int depth, int color, int score, bool condition) {
+    if (depth == INT_MIN || state.terminal()) {
+        if (condition) {
+            return state.value() > score ? true : false;
+        }
+        return state.value() >= score ? true : false;
+    }
+
+    bool player = color == 1 ? true : false;
+    
+    // Arreglo de los estados hijos del estado actual para el jugador actual
+    vector<int> childs = state.possible_moves(player);
+    
+    // Mientras hayan hijos por revisar:
+    if (!childs.empty()) { 
+        for (int child_position : childs) {
+            expanded++;
+            // El estado es generado con la función move
+            state_t state_movement = state.move(player,child_position);
+
+            if (player && test(state_movement,depth-1,-color,score,condition)) {
+                return true;
+            }
+
+            if (!player && !test(state_movement,depth-1,-color,score,condition)) {
+                return false;
+            }            
+        };
+    }
+    
+    // si no hay hijos, ubico el score
+    else {
+        if (player && test(state,depth-1,-color,score,condition)) {
+            return true;
+        }
+        if (!player && !test(state,depth-1,-color,score,condition)) {
+            return false;
+        }
+    }
+
+    return player ? false : true;
+}
+
+int scout(state_t state, int depth, int color, bool use_tt = false) {
+    generated++;
+    bool first_child = true;
+    // Si el árbol alcanzó la profundidad máxima o es terminal, retorna el valor.
+    if (depth == INT_MIN || state.terminal()) {
+        return state.value();
+    };
+
+    int score = 0;
+    // True is White
+    // False is Black
+    bool player = color == 1 ? true : false;
+    
+    // Arreglo de los estados hijos del estado actual para el jugador actual
+    vector<int> childs = state.possible_moves(player);
+    
+    // Mientras hayan hijos por revisar:
+    if (!childs.empty()) { 
+        for (int child_position : childs) {
+            expanded++;
+            // El estado es generado con la función move
+            state_t state_movement = state.move(player,child_position);
+            //int value = scout(state_movement,depth-1,-color,false);
+            if (first_child) {
+                first_child = false;
+                score = scout(state_movement,depth-1,-color,false);
+            }
+            else {
+                if (player && test(state_movement,depth-1,-color,score,true)) {
+                    score = scout(state_movement,depth-1,-color,false);
+                }
+                if (!player && !test(state_movement,depth-1,-color,score,false)) {
+                    score = scout(state_movement,depth-1,-color,false);
+                }
+            }            
+        };
+    }
+    
+    // si no hay hijos, ubico el score
+    else {
+        score = scout(state,depth-1,-color,false);
+    }
+    return score;
+
+}
+
+
+int negascout(state_t state, int depth, int alpha, int beta, int color, bool use_tt = false) {
+    generated++;
+    bool first_child = true;
+    // Si el árbol alcanzó la profundidad máxima o es terminal, retorna el valor.
+    if (depth == INT_MIN || state.terminal()) {
+        return color * state.value();
+    };
+
+    int score = 0;
+    // True is White
+    // False is Black
+    bool player = color == 1 ? true : false;
+    
+    // Arreglo de los estados hijos del estado actual para el jugador actual
+    vector<int> childs = state.possible_moves(player);
+    // Mientras hayan hijos por revisar:
+    if (!childs.empty()) { 
+        for (int child_position : childs) {
+            expanded++;
+            // El estado es generado con la función move
+            state_t state_movement = state.move(player,child_position);
+            //int value = scout(state_movement,depth-1,-color,false);
+            if (first_child) {
+                first_child = false;
+                score = -negascout(state_movement,depth-1,-beta,-alpha,-color,false);
+            }
+            else {
+                score = -negascout(state_movement,depth-1,-alpha-1,-alpha,-color,false);
+                if (alpha < score && score < beta) {
+                    score = -negascout(state_movement,depth-1,-beta,-score,-color,false);
+                }
+            } 
+            alpha = max(alpha,score);
+            if (alpha >= beta) {
+                break;
+            };
+        };
+    }
+    // si no hay hijos, ubico el score
+    else {
+        alpha = -negascout(state,depth-1,-beta,-alpha,-color,false);
+    }
+    
+
+    return alpha;
+}
 
 
 
@@ -132,11 +306,11 @@ int main(int argc, const char **argv) {
             if( algorithm == 1 ) {
                 value = negamax(pv[i], 0, color, use_tt);
             } else if( algorithm == 2 ) {
-                //value = negamax(pv[i], 0, -200, 200, color, use_tt);
+                value = negamax(pv[i], 0, -200, 200, color, use_tt);
             } else if( algorithm == 3 ) {
-                //value = scout(pv[i], 0, color, use_tt);
+                value = scout(pv[i], 0, color, use_tt);
             } else if( algorithm == 4 ) {
-                //value = negascout(pv[i], 0, -200, 200, color, use_tt);
+                value = negascout(pv[i], 0, -200, 200, color, use_tt);
             }
         } catch( const bad_alloc &e ) {
             cout << "size TT[0]: size=" << TTable[0].size() << ", #buckets=" << TTable[0].bucket_count() << endl;
