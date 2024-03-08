@@ -26,6 +26,8 @@
 #define DIM           36
 #define N             6
 
+using namespace std;
+
 const int rows[][7] = {
     { 4, 5, 6, 7, 8, 9,-1 }, { 4, 5, 6, 7, 8, 9,-1 }, { 4, 5, 6, 7, 8, 9,-1 },
     { 4, 5, 6, 7, 8, 9,-1 }, { 4, 5, 6, 7, 8, 9,-1 }, { 4, 5, 6, 7, 8, 9,-1 },
@@ -127,11 +129,23 @@ class state_t {
     int get_random_move(bool color) {
         std::vector<int> valid_moves;
         for( int pos = 0; pos < DIM; ++pos ) {
-            if( (color && is_black_move(pos)) || (!color && is_white_move(pos)) ) {
+            if( (color && is_black_move(pos)) || (-color && is_white_move(pos)) ) {
                 valid_moves.push_back(pos);
             }
         }
         return valid_moves.empty() ? -1 : valid_moves[lrand48() % valid_moves.size()];
+    }
+
+    vector<int> possible_moves(bool player) {
+        // True is White
+        // False is Black
+        vector<int> possible_moves;
+        for (int pos = 0; pos < DIM; ++pos ) { 
+            if ( (player && is_black_move(pos)) || (!player && is_white_move(pos))) {
+                possible_moves.push_back(pos);
+            }
+        }
+        return possible_moves;
     }
 
     bool operator<(const state_t &s) const {

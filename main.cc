@@ -13,7 +13,7 @@
 
 using namespace std;
 
-#include <math.h>
+#include <limits.h>
 
 unsigned expanded = 0;
 unsigned generated = 0;
@@ -41,16 +41,34 @@ hash_table_t TTable[2];
 //int maxmin(state_t state, int depth, bool use_tt);
 //int minmax(state_t state, int depth, bool use_tt = false);
 //int maxmin(state_t state, int depth, bool use_tt = false);
-int negamax(state_t state, int depth, int color, bool use_tt = false){ 
-    if (state.terminal()) {
+/*
+Recibe un estado, una profundidad y un color. El atributo use_tt no se está usando
+*/
+int negamax(state_t state, int depth, int color, bool use_tt = false){
+    // Suma 1 a los nodos generados
+    generated++;
+    // Si el árbol alcanzó la profundidad máxima o es terminal, retorna el valor.
+    if (depth==INT_MAX || state.terminal()) {
         return color * state.value();
     };
-    int alpha = 0;
-    color++;
-    color = color % 2 == 0;
-    
-    while (state.pos() != -1){
-        alpha = max(alpha,-negamax(state.move(color,state.pos()),depth+1,color,use_tt=false));
+    // Inicializa alpha y la variable booleana para el jugador
+    int alpha = INT_MIN;
+    bool player = color == 1 ? true : false;
+    // Arreglo de los estados hijos del estado actual para el jugador actual
+    vector<int> childs = state.possible_moves(player);
+    // Mientras hayan hijos por revisar:
+    if (!childs.empty()) { 
+        for (int child_position : childs) {
+            expanded++;
+            // El estado es generado con la función move
+            state_t state_movement = state.move(player,child_position);
+            // Se calcula Alpha
+            alpha = max(alpha,-negamax(state_movement,depth+1,-color,use_tt=false));
+        };
+    }
+    // si no hay, ubico el alpha 
+    else {
+        alpha = max(alpha,-negamax(state,depth+1,-color,use_tt=false));        
     }
     return alpha;
 }
@@ -76,7 +94,6 @@ int main(int argc, const char **argv) {
         bool player = i % 2 == 0; // black moves first!
         int pos = PV[i];
         pv[npv - i] = state;
-        cout << state.t() << " aaa " << state.pos() << " aaaaaa" << state.free() << endl;
         state = state.move(player, pos);
     }
     pv[0] = state;
@@ -102,7 +119,7 @@ int main(int argc, const char **argv) {
     // Run algorithm along PV (bacwards)
     cout << "Moving along PV:" << endl;
     for( int i = 0; i <= npv; ++i ) {
-        cout << pv[i];
+        //cout << pv[i];
         int value = 0;
         TTable[0].clear();
         TTable[1].clear();
@@ -113,7 +130,7 @@ int main(int argc, const char **argv) {
 
         try {
             if( algorithm == 1 ) {
-                //value = negamax(pv[i], 0, color, use_tt);
+                value = negamax(pv[i], 0, color, use_tt);
             } else if( algorithm == 2 ) {
                 //value = negamax(pv[i], 0, -200, 200, color, use_tt);
             } else if( algorithm == 3 ) {
