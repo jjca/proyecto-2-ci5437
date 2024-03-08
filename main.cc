@@ -13,6 +13,8 @@
 
 using namespace std;
 
+#include <math.h>
+
 unsigned expanded = 0;
 unsigned generated = 0;
 int tt_threshold = 32; // threshold to save entries in TT
@@ -39,10 +41,25 @@ hash_table_t TTable[2];
 //int maxmin(state_t state, int depth, bool use_tt);
 //int minmax(state_t state, int depth, bool use_tt = false);
 //int maxmin(state_t state, int depth, bool use_tt = false);
-int negamax(state_t state, int depth, int color, bool use_tt = false);
+int negamax(state_t state, int depth, int color, bool use_tt = false){ 
+    if (state.terminal()) {
+        return color * state.value();
+    };
+    int alpha = 0;
+    color++;
+    color = color % 2 == 0;
+    
+    while (state.pos() != -1){
+        alpha = max(alpha,-negamax(state.move(color,state.pos()),depth+1,color,use_tt=false));
+    }
+    return alpha;
+}
+
 int negamax(state_t state, int depth, int alpha, int beta, int color, bool use_tt = false);
 int scout(state_t state, int depth, int color, bool use_tt = false);
 int negascout(state_t state, int depth, int alpha, int beta, int color, bool use_tt = false);
+
+
 
 int main(int argc, const char **argv) {
     state_t pv[128];
@@ -52,7 +69,6 @@ int main(int argc, const char **argv) {
     int algorithm = 0;
     if( argc > 1 ) algorithm = atoi(argv[1]);
     bool use_tt = argc > 2;
-
     // Extract principal variation of the game
     state_t state;
     cout << "Extracting principal variation (PV) with " << npv << " plays ... " << flush;
@@ -60,11 +76,11 @@ int main(int argc, const char **argv) {
         bool player = i % 2 == 0; // black moves first!
         int pos = PV[i];
         pv[npv - i] = state;
+        cout << state.t() << " aaa " << state.pos() << " aaaaaa" << state.free() << endl;
         state = state.move(player, pos);
     }
     pv[0] = state;
     cout << "done!" << endl;
-
 #if 0
     // print principal variation
     for( int i = 0; i <= npv; ++i )
@@ -86,7 +102,7 @@ int main(int argc, const char **argv) {
     // Run algorithm along PV (bacwards)
     cout << "Moving along PV:" << endl;
     for( int i = 0; i <= npv; ++i ) {
-        //cout << pv[i];
+        cout << pv[i];
         int value = 0;
         TTable[0].clear();
         TTable[1].clear();
