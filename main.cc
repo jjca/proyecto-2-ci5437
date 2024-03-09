@@ -292,6 +292,7 @@ int main(int argc, const char **argv) {
 
     // Run algorithm along PV (bacwards)
     cout << "Moving along PV:" << endl;
+    cout << "|" << "PV" << "|" << "Color" << "|" << "Valor" << "|" << "Expandidos" << "|" << "Generados" << "|" << "Tiempo" << "|" << "Generados/s" << endl;
     for( int i = 0; i <= npv; ++i ) {
         //cout << pv[i];
         int value = 0;
@@ -319,14 +320,14 @@ int main(int argc, const char **argv) {
         }
 
         float elapsed_time = Utils::read_time_in_seconds() - start_time;
-
-        cout << npv + 1 - i << ". " << (color == 1 ? "Black" : "White") << " moves: "
-             << "value=" << color * value
-             << ", #expanded=" << expanded
-             << ", #generated=" << generated
-             << ", seconds=" << elapsed_time
-             << ", #generated/second=" << generated/elapsed_time
-             << endl;
+        
+        cout << "|" << npv + 1 - i << "|" << (color == 1 ? "Black" : "White") 
+             << "|" << color * value
+             << "|" << expanded
+             << "|" << generated
+             << "|" << elapsed_time
+             << "|" << generated/elapsed_time
+             << "|" << endl;
     }
 
     return 0;
