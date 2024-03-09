@@ -16,14 +16,15 @@ Este proyecto emplea una variación del juego Othello con un tablero 6x6, donde 
 
 ### Implementación
 
-Se completó el juego con la verificación es las diagonales, así como el código que realiza _outflank_ en las diagonales. Para los algoritmos se siguió el pseudocódigo dado en clases.
+Se completó el juego con la verificación en las diagonales, así como el código que realiza _outflank_ en las mismas. Para los algoritmos se siguió el pseudocódigo dado en clases.
 
 ### Experimentación
 
-Se ejecutaron los cuatro algoritmos por 20 minutos o hasta que fallaran por uso de recursos.
+Se ejecutaron los cuatro algoritmos por 20 minutos o hasta que fallaran por falta de recursos.
 
 #### Características de Hardware
-
+- Ubuntu 22.04 LTS, Intel Core i7-9750H @ 2.60GHz, 16GB de RAM
+- Windows Subsystem for Linux con Ubuntu 22.04, Intel Core i5-11400F @ 2.60GHz, 16GB de RAM
 ### Resultados
 
 Para cada algoritmo, se registró:
@@ -57,7 +58,7 @@ Para cada algoritmo, se registró:
 |19|Black|-4|78915639|90647895|17.5217|5.17345e+06|
 |18|White|-4|767689687|876269598|171.228|5.11757e+06|
 
-El algoritmo _negamax_ es el más ineficiente, debido a que genera una gran cantidad de nodos, por lo que debe realizar más operaciones sobre todos ellos. Además, llegó hasta el PV 18, cuando otros algoritmos llegan más adelante.
+El algoritmo _negamax_ es el más ineficiente, debido a que genera una gran cantidad de nodos, por lo que debe realizar más operaciones sobre todos ellos. Además, llegó hasta el PV 18, cuando otros algoritmos llegan más lejos.
 
 #### Negamax con poda $\alpha$-$\beta$
 
@@ -145,12 +146,12 @@ _Negamax con poda_ lógicamente tiene un mejor desempeño que el algoritmo _Nega
 |13|Black|-4|221377402|242589301|82.4484|2.94232e+06|
 |12|White|-4|565087412|623019805|214.172|2.90896e+06
 
-El algoritmo Scout, al igual que Negascout fueron los que mejor se desempeañaron, llegando hasta el PV 12 así como generando una cantidad similar de nodos.
+Los algoritmos Scout y Negascout fueron los que se desempeñaron mejor, llegando hasta el PV 12, así como generando una cantidad similar de nodos.
 
 ### Conclusiones
 
-Podemos concluir que los mejores algoritmos para este juego son Scout y Negascout. Scout es muy bueno debido a la verificación realizada, de forma que se use como función de heurística para no expandir nodos innecesarios (pruning).
+Podemos concluir que los mejores algoritmos para este juego son Scout y Negascout. Debido a la verificación realizada, Scout es muy bueno, de forma de que se use como función de heurística para no expandir nodos innecesarios (pruning).
 
-Negascout aprovecha también las ventajas de Scout para explorar, sin embargo, se requiere un orden para ello.
+Negascout aprovecha también las ventajas de Scout para explorar. Sin embargo, se requiere un orden para ello.
 
 El más eficiente en cantidad de nodos generados fue Scout. En cantidad de nodos expandidos, fue Negascout.
